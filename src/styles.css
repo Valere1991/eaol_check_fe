@@ -14,7 +14,7 @@ h2 { margin-top: 0; }
 .status.ok { border-color: #22c55e; }
 .status.bad { border-color: #ef4444; }
 label { display: block; margin: 14px 0 6px; color: #cbd5e1; font-weight: 700; }
-input, textarea { width: 100%; box-sizing: border-box; background: #020617; border: 1px solid #475569; color: #e2e8f0; border-radius: 12px; padding: 12px; }
+input, textarea, select { width: 100%; box-sizing: border-box; background: #020617; border: 1px solid #475569; color: #e2e8f0; border-radius: 12px; padding: 12px; }
 .actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
 button { border: 0; background: #334155; color: #f8fafc; padding: 11px 14px; border-radius: 12px; cursor: pointer; font-weight: 800; }
 button.primary { background: #38bdf8; color: #082f49; margin-top: 14px; }

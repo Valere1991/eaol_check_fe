@@ -1,9 +1,9 @@
 <main class="shell">
   <section class="hero">
     <div>
-      <p class="eyebrow">EAOL · IT Domain Pilot</p>
-      <h1>Enterprise AI Operating Layer Dashboard</h1>
-      <p class="muted">Pilot dashboard for a real IT company tenant, license enforcement, multilingual causal analysis, and audit visibility.</p>
+      <p class="eyebrow">EAOL · IT Enterprise Pilot</p>
+      <h1>Self-Service Admin & Customer Dashboard</h1>
+      <p class="muted">Create customers, assign exact-time licenses, register integrations, run IT causal analysis, and inspect audit records.</p>
     </div>
     <div class="status" [class.ok]="license?.allowed" [class.bad]="license && !license.allowed">
       <span>Tenant</span>
@@ -14,24 +14,65 @@
 
   <section class="grid">
     <article class="card">
-      <h2>Configuration</h2>
+      <h2>1 · Admin creates customer</h2>
       <label>API base URL</label>
       <input [(ngModel)]="apiBase" />
       <label>Tenant ID</label>
       <input [(ngModel)]="tenantId" />
+      <label>Customer name</label>
+      <input [(ngModel)]="customerName" />
+      <label>Admin email</label>
+      <input [(ngModel)]="adminEmail" />
       <div class="actions">
         <button (click)="checkHealth()">Health</button>
-        <button (click)="checkLicense()">Check License</button>
-        <button (click)="loadAudit()">Audit</button>
+        <button class="primary" (click)="createCustomer()">Create Customer</button>
+        <button (click)="listCustomers()">List Customers</button>
       </div>
     </article>
 
     <article class="card">
-      <h2>Multilingual IT Root Cause</h2>
+      <h2>2 · Admin assigns license</h2>
+      <label>Valid from</label>
+      <input [(ngModel)]="validFrom" />
+      <label>Valid until</label>
+      <input [(ngModel)]="validUntil" />
+      <div class="actions">
+        <button class="primary" (click)="assignLicense()">Assign License</button>
+        <button (click)="checkLicense()">Check License</button>
+      </div>
+      <p class="muted">When expired, protected backend capabilities return HTTP 402 and list notification channels.</p>
+    </article>
+
+    <article class="card">
+      <h2>3 · Admin configures integration</h2>
+      <label>Integration type</label>
+      <select [(ngModel)]="integrationType">
+        <option value="jira">Jira</option>
+        <option value="servicenow">ServiceNow</option>
+        <option value="excel">Excel</option>
+        <option value="sharepoint">SharePoint</option>
+        <option value="sap">SAP</option>
+        <option value="erp">ERP</option>
+      </select>
+      <label>Name</label>
+      <input [(ngModel)]="integrationName" />
+      <label>Base URL</label>
+      <input [(ngModel)]="integrationBaseUrl" />
+      <div class="actions">
+        <button class="primary" (click)="createIntegration()">Create Integration</button>
+        <button (click)="listIntegrations()">List Integrations</button>
+      </div>
+    </article>
+
+    <article class="card">
+      <h2>4 · Customer runs IT analysis</h2>
       <label>Question</label>
       <textarea [(ngModel)]="question" rows="5"></textarea>
-      <button class="primary" (click)="runGermanAnalysis()">Run Analysis</button>
-      <p class="muted">German input should produce German synthesis and <code>response_language = de</code>.</p>
+      <div class="actions">
+        <button class="primary" (click)="runGermanAnalysis()">Run Analysis</button>
+        <button (click)="loadAudit()">Audit</button>
+      </div>
+      <p class="muted">German input should return German synthesis and <code>response_language = de</code>.</p>
     </article>
   </section>
 
