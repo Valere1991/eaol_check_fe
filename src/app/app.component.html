@@ -3,7 +3,7 @@
     <div>
       <p class="eyebrow">EAOL · IT Enterprise Pilot</p>
       <h1>Self-Service Admin & Customer Dashboard</h1>
-      <p class="muted">Create customers, assign exact-time licenses, register integrations, run IT causal analysis, and inspect audit records.</p>
+      <p class="muted">Create customers, assign exact-time licenses, register integrations, run IT causal analysis, and inspect audit records with Keycloak roles.</p>
     </div>
     <div class="status" [class.ok]="license?.allowed" [class.bad]="license && !license.allowed">
       <span>Tenant</span>
@@ -12,8 +12,24 @@
     </div>
   </section>
 
+  <section class="card authbar">
+    <div>
+      <h2>Keycloak session</h2>
+      <p class="muted">Realm <code>eaol</code> · client <code>eaol-dashboard</code></p>
+      <p>
+        <strong>{{ auth.authenticated ? auth.currentUser().username : 'local-dev / not logged in' }}</strong>
+        <span class="muted"> · roles: {{ auth.currentUser().roles.join(', ') || 'dev roles when backend security disabled' }}</span>
+      </p>
+    </div>
+    <div class="actions">
+      <button class="primary" *ngIf="!auth.authenticated" (click)="login()">Login</button>
+      <button *ngIf="auth.authenticated" (click)="logout()">Logout</button>
+      <button (click)="whoAmI()">Who am I?</button>
+    </div>
+  </section>
+
   <section class="grid">
-    <article class="card">
+    <article class="card" [class.disabled]="!isEaolAdmin">
       <h2>1 · Admin creates customer</h2>
       <label>API base URL</label>
       <input [(ngModel)]="apiBase" />
@@ -30,7 +46,7 @@
       </div>
     </article>
 
-    <article class="card">
+    <article class="card" [class.disabled]="!isEaolAdmin">
       <h2>2 · Admin assigns license</h2>
       <label>Valid from</label>
       <input [(ngModel)]="validFrom" />
@@ -43,7 +59,7 @@
       <p class="muted">When expired, protected backend capabilities return HTTP 402 and list notification channels.</p>
     </article>
 
-    <article class="card">
+    <article class="card" [class.disabled]="!isCustomerAdmin">
       <h2>3 · Admin configures integration</h2>
       <label>Integration type</label>
       <select [(ngModel)]="integrationType">
@@ -64,7 +80,7 @@
       </div>
     </article>
 
-    <article class="card">
+    <article class="card" [class.disabled]="!isCustomerUser">
       <h2>4 · Customer runs IT analysis</h2>
       <label>Question</label>
       <textarea [(ngModel)]="question" rows="5"></textarea>

@@ -1,7 +1,8 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { HttpClient } from '@angular/common/http';
+import { AuthService } from './services/auth.service';
+import { ApiService } from './services/api.service';
 
 interface LicenseStatus {
   allowed: boolean;
@@ -21,7 +22,8 @@ interface LicenseStatus {
   templateUrl: './app.component.html'
 })
 export class AppComponent {
-  private readonly http = inject(HttpClient);
+  readonly auth = inject(AuthService);
+  private readonly api = inject(ApiService);
 
   apiBase = 'http://localhost:8000';
   tenantId = 'firma-it';
@@ -33,15 +35,24 @@ export class AppComponent {
   integrationName = 'Firma Jira Cloud';
   integrationBaseUrl = 'https://firma-it.atlassian.net';
   question = 'Warum ist die Payments API am 5. Mai 2026 langsamer geworden?';
-  output = 'Ready. Connect to EAOL backend on http://localhost:8000.';
+  output = 'Ready. Login with Keycloak or use local dev mode when backend security is disabled.';
   license?: LicenseStatus;
 
-  checkHealth(): void { this.get('/health'); }
-  listCustomers(): void { this.get('/api/v1/admin/customers'); }
-  listIntegrations(): void { this.get(`/api/v1/admin/integrations/${this.tenantId}`); }
-  loadAudit(): void { this.get(`/api/v1/audit/${this.tenantId}`); }
+  get isEaolAdmin(): boolean { return this.auth.hasRole('eaol_admin') || !this.auth.authenticated; }
+  get isCustomerAdmin(): boolean { return this.auth.hasRole('customer_admin') || this.isEaolAdmin; }
+  get isCustomerUser(): boolean { return this.auth.hasRole('customer_user') || this.isCustomerAdmin; }
+
+  login(): void { void this.auth.login(); }
+  logout(): void { void this.auth.logout(); }
+
+  checkHealth(): void { this.syncBase(); this.get('/health'); }
+  whoAmI(): void { this.syncBase(); this.get('/api/v1/me'); }
+  listCustomers(): void { this.syncBase(); this.get('/api/v1/admin/customers'); }
+  listIntegrations(): void { this.syncBase(); this.get(`/api/v1/admin/integrations/${this.tenantId}`); }
+  loadAudit(): void { this.syncBase(); this.get(`/api/v1/audit/${this.tenantId}`); }
 
   createCustomer(): void {
+    this.syncBase();
     this.post('/api/v1/admin/customers', {
       tenant_id: this.tenantId,
       name: this.customerName,
@@ -53,6 +64,7 @@ export class AppComponent {
   }
 
   assignLicense(): void {
+    this.syncBase();
     this.post(`/api/v1/admin/customers/${this.tenantId}/license`, {
       tenant_id: this.tenantId,
       customer_name: this.customerName,
@@ -68,6 +80,7 @@ export class AppComponent {
   }
 
   createIntegration(): void {
+    this.syncBase();
     this.post('/api/v1/admin/integrations', {
       tenant_id: this.tenantId,
       integration_type: this.integrationType,
@@ -80,7 +93,8 @@ export class AppComponent {
   }
 
   checkLicense(): void {
-    this.http.get<LicenseStatus>(`${this.apiBase}/api/v1/licenses/${this.tenantId}/features/causal_intelligence`)
+    this.syncBase();
+    this.api.get<LicenseStatus>(`/api/v1/licenses/${this.tenantId}/features/causal_intelligence`)
       .subscribe({
         next: (value) => { this.license = value; this.output = JSON.stringify(value, null, 2); },
         error: (err) => this.output = JSON.stringify(err.error ?? err, null, 2)
@@ -88,6 +102,7 @@ export class AppComponent {
   }
 
   runGermanAnalysis(): void {
+    this.syncBase();
     const body = {
       tenant_id: this.tenantId,
       case_id: 'pilot-it-payments-latency-2026-05-05',
@@ -102,16 +117,20 @@ export class AppComponent {
   }
 
   private get(path: string): void {
-    this.http.get(`${this.apiBase}${path}`).subscribe({
+    this.api.get<unknown>(path).subscribe({
       next: (value) => this.output = JSON.stringify(value, null, 2),
       error: (err) => this.output = JSON.stringify(err.error ?? err, null, 2)
     });
   }
 
   private post(path: string, body: unknown): void {
-    this.http.post(`${this.apiBase}${path}`, body).subscribe({
+    this.api.post<unknown>(path, body).subscribe({
       next: (value) => this.output = JSON.stringify(value, null, 2),
       error: (err) => this.output = JSON.stringify(err.error ?? err, null, 2)
     });
+  }
+
+  private syncBase(): void {
+    this.api.baseUrl = this.apiBase;
   }
 }
