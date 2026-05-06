@@ -1,0 +1,42 @@
+<main class="shell">
+  <section class="hero">
+    <div>
+      <p class="eyebrow">EAOL · IT Domain Pilot</p>
+      <h1>Enterprise AI Operating Layer Dashboard</h1>
+      <p class="muted">Pilot dashboard for a real IT company tenant, license enforcement, multilingual causal analysis, and audit visibility.</p>
+    </div>
+    <div class="status" [class.ok]="license?.allowed" [class.bad]="license && !license.allowed">
+      <span>Tenant</span>
+      <strong>{{ tenantId }}</strong>
+      <small>{{ license?.status || 'not checked' }}</small>
+    </div>
+  </section>
+
+  <section class="grid">
+    <article class="card">
+      <h2>Configuration</h2>
+      <label>API base URL</label>
+      <input [(ngModel)]="apiBase" />
+      <label>Tenant ID</label>
+      <input [(ngModel)]="tenantId" />
+      <div class="actions">
+        <button (click)="checkHealth()">Health</button>
+        <button (click)="checkLicense()">Check License</button>
+        <button (click)="loadAudit()">Audit</button>
+      </div>
+    </article>
+
+    <article class="card">
+      <h2>Multilingual IT Root Cause</h2>
+      <label>Question</label>
+      <textarea [(ngModel)]="question" rows="5"></textarea>
+      <button class="primary" (click)="runGermanAnalysis()">Run Analysis</button>
+      <p class="muted">German input should produce German synthesis and <code>response_language = de</code>.</p>
+    </article>
+  </section>
+
+  <section class="card">
+    <h2>Output</h2>
+    <pre>{{ output }}</pre>
+  </section>
+</main>
